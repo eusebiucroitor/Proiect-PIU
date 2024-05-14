@@ -1,0 +1,14 @@
+C:\Users\croit\source\repos\Form3\bin\Debug\Form3.exe.config
+C:\Users\croit\source\repos\Form3\bin\Debug\Form3.exe
+C:\Users\croit\source\repos\Form3\bin\Debug\Form3.pdb
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.csproj.AssemblyReference.cache
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.Properties.Resources.resources
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.csproj.GenerateResource.cache
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.csproj.CoreCompileInputs.cache
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.exe
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.pdb
+C:\Users\croit\source\repos\Form3\bin\Debug\ConsoleApp.exe
+C:\Users\croit\source\repos\Form3\bin\Debug\ConsoleApp.pdb
+C:\Users\croit\source\repos\Form3\bin\Debug\ConsoleApp.exe.config
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.Form1.resources
+C:\Users\croit\source\repos\Form3\obj\Debug\Form3.csproj.Up2Date
