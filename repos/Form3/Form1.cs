@@ -30,6 +30,24 @@ namespace Form3
             // Display activities in DataGridView and ListBox
             DisplayActivitatiInDataGridView();
         }
+        private void WriteDataToFile(string fileName)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(fileName))
+                {
+                    foreach (Activitate activitate in activitati)
+                    {
+                        // Scrie fiecare activitate într-o linie separată în fișier
+                        sw.WriteLine($"{activitate.Nume},{activitate.Tip},{activitate.Data},{activitate.Descriere}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while writing to the file: " + ex.Message);
+            }
+        }
 
         private void ReadDataFromFile()
         {
@@ -37,19 +55,40 @@ namespace Form3
 
             try
             {
-                using (StreamReader sr = new StreamReader(fileName))
+                if (!string.IsNullOrEmpty(fileName))
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
+                    using (StreamReader sr = new StreamReader(fileName))
                     {
-                        Activitate activitate = new Activitate(line);
-                        activitati.Add(activitate);
+                        string line;
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            // Descompune linia citită în componente (nume, tip, data, descriere)
+                            string[] components = line.Split(',');
+
+                            // Verifică dacă linia are suficiente componente
+                            if (components.Length >= 4)
+                            {
+                                // Creează un nou obiect Activitate și adaugă-l în lista de activități
+                                Activitate activitate = new Activitate()
+                                {
+                                    Nume = components[0],
+                                    Tip = components[1],
+                                    Data = DateTime.Parse(components[2]),
+                                    Descriere = components[3]
+                                };
+                                activitati.Add(activitate);
+                            }
+                        }
                     }
+                }
+                else
+                {
+                    MessageBox.Show("Error: File name is empty or null in the configuration file.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error occurred while reading the file: " + ex.Message);
+                MessageBox.Show("An error occurred while reading the file '" + fileName + "': " + ex.Message);
             }
         }
 
@@ -58,31 +97,34 @@ namespace Form3
             dataGridView1.Rows.Clear();
 
             // Add headers to the DataGridView
-            dataGridView1.ColumnCount = 4;
+            dataGridView1.ColumnCount = 5; // Adăugăm o coloană suplimentară pentru butonul de ștergere
             dataGridView1.Columns[0].Name = "Nume";
             dataGridView1.Columns[1].Name = "Tip";
             dataGridView1.Columns[2].Name = "Data";
             dataGridView1.Columns[3].Name = "Descriere";
+            dataGridView1.Columns[4].Name = "Delete"; // Numele coloanei pentru butonul de ștergere
 
             // Add each activity to the DataGridView
             foreach (Activitate activitate in activitati)
             {
-                dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere);
+                DataGridViewButtonCell deleteButtonCell = new DataGridViewButtonCell();
+                deleteButtonCell.Value = "Delete";
+                dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere, deleteButtonCell);
             }
+
+            // Subscriere la evenimentul de click pentru butoanele de ștergere
+            dataGridView1.CellContentClick += DataGridView1_CellContentClick;
         }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
+        private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        { 
         }
-
-        private void button1_Click(object sender, EventArgs e)
+            private void button1_Click(object sender, EventArgs e)
         {
-            // Extrage valorile din text box-uri
+            // Extrage valorile din text box-uri și radio buttons
             string nume = textBox1.Text;
             string activitate = textBox2.Text;
             DateTime data = dateTimePicker1.Value;
-            string descriere = textBox4.Text;
+            string descriere = GetSelectedDescription();
 
             // Creează un obiect Activitate cu valorile extrase
             Activitate newActivitate = new Activitate()
@@ -98,12 +140,59 @@ namespace Form3
 
             // Actualizează afișarea în DataGridView
             DisplayActivitatiInDataGridView();
+
+            // Scrie datele în fișier
+            string fileName = ConfigurationManager.AppSettings.Get("NumeFisier");
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                WriteDataToFile(fileName);
+            }
+            else
+            {
+                MessageBox.Show("Error: File name is empty or null in the configuration file.");
+            }
+            textBox1.Text = "";
+            textBox2.Text = "";
+            radioButton1.Checked = false;
+            radioButton2.Checked = false;
+            radioButton3.Checked = false;
+            radioButton4.Checked = false;
+        }
+
+        private string GetSelectedDescription()
+        {
+            // Verifică care radio button este selectat și întoarce textul corespunzător
+            if (radioButton1.Checked)
+            {
+                return radioButton1.Text;
+            }
+            else if (radioButton2.Checked)
+            {
+                return radioButton2.Text;
+            }
+            else if (radioButton3.Checked)
+            {
+                return radioButton3.Text;
+            }
+            else if (radioButton4.Checked)
+            {
+                return radioButton4.Text;
+            }
+            else
+            {
+                return ""; // În cazul în care niciun radio button nu este selectat
+            }
         }
 
         private void label5_Click(object sender, EventArgs e)
         {
 
         }
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Implementează codul pentru acest eveniment aici sau poți lăsa această metodă goală dacă nu ai nevoie să faci nimic atunci când se face click pe conținutul celulei DataGridView.
+        }
+
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             string searchTerm = textBox3.Text.ToLower();
@@ -127,9 +216,5 @@ namespace Form3
                 dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere);
             }
         }
-
-       
     }
 }
-    
-
