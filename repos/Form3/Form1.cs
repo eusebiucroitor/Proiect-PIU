@@ -30,6 +30,7 @@ namespace Form3
             // Display activities in DataGridView and ListBox
             DisplayActivitatiInDataGridView();
         }
+
         private void WriteDataToFile(string fileName)
         {
             try
@@ -96,6 +97,9 @@ namespace Form3
         {
             dataGridView1.Rows.Clear();
 
+            // Obține data curentă
+            DateTime currentDate = DateTime.Now.Date;
+
             // Add headers to the DataGridView
             dataGridView1.ColumnCount = 5; // Adăugăm o coloană suplimentară pentru butonul de ștergere
             dataGridView1.Columns[0].Name = "Nume";
@@ -104,24 +108,56 @@ namespace Form3
             dataGridView1.Columns[3].Name = "Descriere";
             dataGridView1.Columns[4].Name = "Delete"; // Numele coloanei pentru butonul de ștergere
 
-            // Add each activity to the DataGridView
+            // Add only activities for the current day to the DataGridView
             foreach (Activitate activitate in activitati)
             {
-                DataGridViewButtonCell deleteButtonCell = new DataGridViewButtonCell();
-                deleteButtonCell.Value = "Delete";
-                dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere, deleteButtonCell);
+                if (activitate.Data.Date == currentDate)
+                    {
+                    DataGridViewButtonCell deleteButtonCell = new DataGridViewButtonCell();
+                    deleteButtonCell.Value = "Delete";
+                    dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere, "Delete");
+                }
             }
 
             // Subscriere la evenimentul de click pentru butoanele de ștergere
             dataGridView1.CellContentClick += DataGridView1_CellContentClick;
         }
+
+        //
+
+
+
         private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        { 
+        {
+            // Verificăm dacă butonul "Delete" a fost apăsat și rândul nu este antetul
+            if (e.ColumnIndex == dataGridView1.Columns["Delete"].Index && e.RowIndex >= 0)
+            {
+                // Obținem activitatea corespunzătoare rândului
+                Activitate activitateToDelete = activitati[e.RowIndex];
+
+                // Ștergem activitatea din listă
+                activitati.Remove(activitateToDelete);
+
+                // Actualizăm afișarea în DataGridView
+                DisplayActivitatiInDataGridView();
+
+                // De asemenea, puteți adăuga cod pentru a șterge activitatea din fișier, dacă este necesar
+                string fileName = ConfigurationManager.AppSettings.Get("NumeFisier");
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    WriteDataToFile(fileName);
+                }
+                else
+                {
+                    MessageBox.Show("Error: File name is empty or null in the configuration file.");
+                }
+            }
         }
-            private void button1_Click(object sender, EventArgs e)
+
+        private void button1_Click(object sender, EventArgs e)
         {
             // Extrage valorile din text box-uri și radio buttons
-            string nume = textBox1.Text;
+            string nume = inputNume.Text;
             string activitate = textBox2.Text;
             DateTime data = dateTimePicker1.Value;
             string descriere = GetSelectedDescription();
@@ -151,7 +187,7 @@ namespace Form3
             {
                 MessageBox.Show("Error: File name is empty or null in the configuration file.");
             }
-            textBox1.Text = "";
+            inputNume.Text = "";
             textBox2.Text = "";
             radioButton1.Checked = false;
             radioButton2.Checked = false;
@@ -184,15 +220,6 @@ namespace Form3
             }
         }
 
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            // Implementează codul pentru acest eveniment aici sau poți lăsa această metodă goală dacă nu ai nevoie să faci nimic atunci când se face click pe conținutul celulei DataGridView.
-        }
-
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             string searchTerm = textBox3.Text.ToLower();
@@ -213,7 +240,16 @@ namespace Form3
 
             foreach (Activitate activitate in filteredActivitati)
             {
-                dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere);
+                // Adăugați un buton "Delete" pentru fiecare activitate în rândul corespunzător
+                DataGridViewButtonCell deleteButtonCell = new DataGridViewButtonCell();
+                deleteButtonCell.Value = "Delete";
+
+                // Adăugați rândul și butonul "Delete" în tabel
+                int rowIndex = dataGridView1.Rows.Add(activitate.Nume, activitate.Tip, activitate.Data, activitate.Descriere, "Delete");
+
+                // Asociem evenimentul de click pentru butonul de ștergere
+                dataGridView1.Rows[rowIndex].Cells["Delete"].Value = "Delete";
+                dataGridView1.CellContentClick += DataGridView1_CellContentClick;
             }
         }
     }
